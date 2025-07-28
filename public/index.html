@@ -37,19 +37,36 @@
   </div>
 
   <div class="right">
-    <h2>Editable Quiz Viewer</h2>
-    <form id="quizForm"></form>
-    <button onclick="saveQuiz()">Save</button>
+    <div class="tabs">
+      <button class="tab-btn active" onclick="switchRightTab('preview')">Preview</button>
+      <button class="tab-btn" onclick="switchRightTab('editForm')">Edit</button>
+    </div>
+    <div id="preview" class="tab-content active">
+      <div id="quizPreview"></div>
+    </div>
+    <div id="editForm" class="tab-content">
+      <h2>Editable Quiz Viewer</h2>
+      <form id="quizForm"></form>
+      <button onclick="saveQuiz()">Save</button>
+    </div>
   </div>
 
   <script>
     let quizData = {};
 
     function switchTab(tabId) {
-      document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-      document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
-      document.querySelector(`.tab-btn[onclick*='${tabId}']`).classList.add('active');
+      document.querySelectorAll('.left .tab-btn').forEach(btn => btn.classList.remove('active'));
+      document.querySelectorAll('.left .tab-content').forEach(tab => tab.classList.remove('active'));
+      document.querySelector(`.left .tab-btn[onclick*='${tabId}']`).classList.add('active');
       document.getElementById(tabId).classList.add('active');
+    }
+
+    function switchRightTab(tabId) {
+      document.querySelectorAll('.right .tab-btn').forEach(btn => btn.classList.remove('active'));
+      document.querySelectorAll('.right .tab-content').forEach(tab => tab.classList.remove('active'));
+      document.querySelector(`.right .tab-btn[onclick*='${tabId}']`).classList.add('active');
+      document.getElementById(tabId).classList.add('active');
+      if (tabId === 'preview') MathJax.typesetPromise();
     }
 
     function copyJson() {
@@ -61,6 +78,7 @@
       try {
         quizData = JSON.parse(document.getElementById('jsonInput').value);
         renderForm();
+        renderPreview();
         updateJsonView();
       } catch (err) {
         alert('Invalid JSON');
@@ -73,7 +91,10 @@
 
       form.innerHTML += `<label>Title</label><input value="${quizData.title}" name="title">`;
       form.innerHTML += `<label>Description</label><input value="${quizData.description}" name="description">`;
-      form.innerHTML += `<label>Grade</label><input value="${quizData.grade}" name="grade">`;
+      form.innerHTML += `<label>Grade</label><input value="${quizData.grade}" name="grade" type="number">`;
+      form.innerHTML += `<label>Cost</label><input value="${quizData.cost}" name="cost" type="number">`;
+      form.innerHTML += `<label>Estimated Time</label><input value="${quizData.estimatedTime}" name="estimatedTime" type="number">`;
+      form.innerHTML += `<label>Total Questions</label><input value="${quizData.totalQuestions}" name="totalQuestions" type="number">`;
 
       quizData.questions.forEach((q, idx) => {
         const box = document.createElement('div');
@@ -100,12 +121,43 @@
       });
     }
 
+    function renderPreview() {
+      const container = document.getElementById('quizPreview');
+      container.innerHTML = `
+        <h2>${quizData.title}</h2>
+        <p><strong>Description:</strong> ${quizData.description}</p>
+        <p><strong>Grade:</strong> ${quizData.grade}</p>
+        <p><strong>Cost:</strong> ${quizData.cost}</p>
+        <p><strong>Estimated Time:</strong> ${quizData.estimatedTime} minutes</p>
+        <p><strong>Total Questions:</strong> ${quizData.totalQuestions}</p>
+      `;
+      quizData.questions.forEach((q, i) => {
+        const box = document.createElement('div');
+        box.className = 'question-box';
+        box.innerHTML = `<div><strong>Q${i + 1}:</strong> ${q.question}</div>`;
+        if (q.non_question) return container.appendChild(box);
+        if (q.options && q.options.length > 0) {
+          q.options.forEach((opt, j) => {
+            const isCorrect = j === q.answer;
+            box.innerHTML += `<div style="margin-left:1rem;color:${isCorrect ? 'green' : 'black'}">${opt}</div>`;
+          });
+        } else if (q.answer) {
+          box.innerHTML += `<div style="margin-left:1rem;"><strong>Answer:</strong> ${q.answer}</div>`;
+        }
+        container.appendChild(box);
+      });
+      MathJax.typesetPromise();
+    }
+
     function saveQuiz() {
       const formData = new FormData(document.getElementById('quizForm'));
 
       quizData.title = formData.get('title');
       quizData.description = formData.get('description');
-      quizData.grade = formData.get('grade');
+      quizData.grade = parseInt(formData.get('grade'));
+      quizData.cost = parseInt(formData.get('cost'));
+      quizData.estimatedTime = parseInt(formData.get('estimatedTime'));
+      quizData.totalQuestions = parseInt(formData.get('totalQuestions'));
 
       quizData.questions.forEach((q, idx) => {
         q.question = formData.get(`question-${idx}`);
@@ -118,6 +170,7 @@
       });
 
       updateJsonView();
+      renderPreview();
       alert('Quiz updated successfully!');
     }
 
