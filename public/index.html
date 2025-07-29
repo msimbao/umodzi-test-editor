@@ -89,15 +89,15 @@
 <!-- Left Panel -->
 <div class="panel">
   <div class="tabs">
-    <div class="tab active" data-tab="input">Input JSON</div>
-    <div class="tab" data-tab="copy">Copy JSON</div>
+    <div class="tab active" data-tab="input">LOAD TEST</div>
+    <div class="tab" data-tab="copy">DOWNLOAD</div>
   </div>
   <div id="input" class="tab-content active">
     <textarea id="jsonInput" placeholder="Paste your JSON here"></textarea>
     <br>
     <input type="file" id="fileInput" accept=".json">
     <br>
-    <button onclick="loadJSON()">Load JSON</button>
+    <button onclick="loadJSON()">UPLOAD TEST</button>
   </div>
   <div id="copy" class="tab-content">
     <textarea id="jsonOutput" readonly></textarea>
@@ -110,8 +110,8 @@
 <!-- Right Panel -->
 <div class="panel right-panel">
   <div class="tabs">
-    <div class="tab active" data-tab="preview">Preview</div>
-    <div class="tab" data-tab="edit">Edit JSON</div>
+    <div class="tab active" data-tab="preview">PREVIEW</div>
+    <div class="tab" data-tab="edit">EDIT TEST</div>
   </div>
   <div id="preview" class="tab-content active">
     <h1 id="title">Loading...</h1>
@@ -203,7 +203,7 @@
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `${currentData.title || 'quiz'}.json`;
+    a.download = `${currentData.id || 'quiz'}.json`;
     a.click();
     URL.revokeObjectURL(url);
   }
