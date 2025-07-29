@@ -64,6 +64,10 @@
       margin-top: 0.5rem;
       color: #0d6efd;
     }
+        .explanation {
+      margin-top: 0.5rem;
+      color: #A020F0;
+    }
     textarea {
       width: 100%;
       height: 300px;
@@ -256,10 +260,20 @@ function updatePreview() {
       div.appendChild(ul);
     } else if (typeof q.answer === 'string' || typeof q.answer === 'number') {
       const answer = document.createElement('p');
-      answer.className = 'answer';
+        answer.className = 'answer';
+
       answer.innerHTML = '<strong>Answer:</strong> ' + renderMath(q.answer.toString());
+      
       div.appendChild(answer);
     }
+
+          if (q.explanation) {
+  const explanation = document.createElement('p');
+        explanation.className = 'explanation';
+
+  explanation.innerHTML = '<strong>Explanation:</strong> ' + renderMath(q.explanation);
+  div.appendChild(explanation);
+}
 
     container.appendChild(div);
   });
@@ -267,6 +281,8 @@ function updatePreview() {
   if (window.MathJax) {
     MathJax.typesetPromise();
   }
+
+  
 }
 
   function updateEditForm() {
@@ -309,6 +325,11 @@ function updatePreview() {
       inputAns.placeholder = 'Answer (index or text)';
       div.appendChild(inputAns);
 
+      const inputExpl = document.createElement('textarea');
+inputExpl.value = q.explanation || '';
+inputExpl.placeholder = 'Explanation (optional)';
+div.appendChild(inputExpl);
+
       container.appendChild(div);
     });
   }
@@ -321,7 +342,7 @@ function updatePreview() {
   const data = currentData;
   data.title = document.getElementById('editTitle').value;
   data.description = document.getElementById('editDescription').value;
-  data.grade = parseIntOrBlank(document.getElementById('editGrade').value);
+  data.grade = document.getElementById('editGrade').value;
   data.cost = parseIntOrBlank(document.getElementById('editCost').value);
   data.estimatedTime = parseIntOrBlank(document.getElementById('editEstimatedTime').value);
   data.totalQuestions = parseIntOrBlank(document.getElementById('editTotalQuestions').value);
@@ -360,7 +381,12 @@ function updatePreview() {
       }
     }
 
-    data.questions.push(question);
+    // data.questions.push(question);
+    const explanationInput = div.querySelector('textarea');
+if (explanationInput) {
+  question.explanation = explanationInput.value.trim();
+}
+data.questions.push(question);
   }
 
   updateAll();
