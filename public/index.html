@@ -68,6 +68,11 @@
       margin-top: 0.5rem;
       color: #A020F0;
     }
+    .questionNumber{
+      font-size: large;
+      font-weight:bold;
+      color:"red"
+    }
     textarea {
       width: 100%;
       height: 300px;
@@ -229,8 +234,15 @@ function updatePreview() {
 
   if (!data.questions) return;
 
-  data.questions.forEach(q => {
+  data.questions.forEach((q, idx) => {
     const div = document.createElement('div');
+
+    const questionNumber = document.createElement('p');
+    questionNumber.innerHTML = `Question: ${q.id}`;
+            questionNumber.className = 'questionNumber';
+
+    div.appendChild(questionNumber);
+
     div.className = 'question';
 
     const p = document.createElement('p');
@@ -242,10 +254,34 @@ function updatePreview() {
       return;
     }
 
+    
     // Only render options if there are any
     if (q.options && q.options.length > 0) {
       const ul = document.createElement('ul');
       ul.className = 'options';
+
+      if (q.image) {
+  const imgContainer = document.createElement('div');
+  imgContainer.style.marginTop = '0.5rem';
+
+  // Simple check: if it looks like a URL or image filename, try to show image
+  const isImage = /\.(jpg|jpeg|png|gif|svg|webp)$/i.test(q.image) || q.image.startsWith('http');
+
+  if (isImage) {
+    const img = document.createElement('img');
+    img.src = q.image;
+    img.alt = 'Question image';
+    img.style.maxWidth = '100%';
+    img.style.marginTop = '0.25rem';
+    imgContainer.appendChild(img);
+  } else {
+    const text = document.createElement('p');
+    text.innerHTML = '<strong>Image:</strong> ' + q.image;
+    imgContainer.appendChild(text);
+  }
+
+  div.appendChild(imgContainer);
+}
 
       q.options.forEach((opt, i) => {
         const li = document.createElement('li');
@@ -273,6 +309,8 @@ function updatePreview() {
 
   explanation.innerHTML = '<strong>Explanation:</strong> ' + renderMath(q.explanation);
   div.appendChild(explanation);
+
+  
 }
 
     container.appendChild(div);
@@ -303,13 +341,33 @@ function updatePreview() {
       const div = document.createElement('div');
       div.className = 'question';
 
-      const inputQ = document.createElement('input');
-      inputQ.type = 'text';
-      inputQ.value = q.question || '';
-      inputQ.placeholder = 'Question text';
-      div.appendChild(inputQ);
+     const labelQ = document.createElement('label');
+labelQ.textContent = `Question ${idx + 1}`;
+div.appendChild(labelQ);
+
+const inputQ = document.createElement('input');
+inputQ.type = 'text';
+inputQ.value = q.question || '';
+inputQ.placeholder = 'Question text';
+div.appendChild(inputQ);
+
+  const labelImg = document.createElement('label');
+labelImg.textContent = 'Image (URL or text)';
+div.appendChild(labelImg);
+
+const inputImage = document.createElement('input');
+inputImage.type = 'text';
+inputImage.value = q.image || '';
+inputImage.placeholder = 'Image URL or description';
+div.appendChild(inputImage);
+
 
       if (q.options && q.options.length > 0) {
+
+          const labelOpts = document.createElement('label');
+  labelOpts.textContent = 'Options';
+  div.appendChild(labelOpts);
+
         q.options.forEach((opt, i) => {
           const inputOpt = document.createElement('input');
           inputOpt.type = 'text';
@@ -318,17 +376,26 @@ function updatePreview() {
           div.appendChild(inputOpt);
         });
       }
+const labelAns = document.createElement('label');
+labelAns.textContent = 'Answer';
+div.appendChild(labelAns);
 
-      const inputAns = document.createElement('input');
-      inputAns.type = 'text';
-      inputAns.value = q.answer;
-      inputAns.placeholder = 'Answer (index or text)';
-      div.appendChild(inputAns);
+const inputAns = document.createElement('input');
+inputAns.type = 'text';
+inputAns.value = q.answer;
+inputAns.placeholder = 'Answer (index or text)';
+div.appendChild(inputAns);
 
-      const inputExpl = document.createElement('textarea');
+
+const labelExpl = document.createElement('label');
+labelExpl.textContent = 'Explanation';
+div.appendChild(labelExpl);
+
+const inputExpl = document.createElement('textarea');
 inputExpl.value = q.explanation || '';
 inputExpl.placeholder = 'Explanation (optional)';
 div.appendChild(inputExpl);
+
 
       container.appendChild(div);
     });
@@ -385,6 +452,12 @@ div.appendChild(inputExpl);
     const explanationInput = div.querySelector('textarea');
 if (explanationInput) {
   question.explanation = explanationInput.value.trim();
+}
+
+
+const imageInput = div.querySelector('input[placeholder="Image URL or description"]');
+if (imageInput) {
+  question.image = imageInput.value.trim();
 }
 data.questions.push(question);
   }
