@@ -342,7 +342,7 @@ function updatePreview() {
       div.className = 'question';
 
      const labelQ = document.createElement('label');
-labelQ.textContent = `Question ${idx + 1}`;
+labelQ.textContent = `Question ${q.id}`;
 div.appendChild(labelQ);
 
 const inputQ = document.createElement('input');
@@ -401,66 +401,73 @@ div.appendChild(inputExpl);
     });
   }
 
-  function parseIntOrBlank(value) {
-    return value.trim() === '' ? '' : parseInt(value, 10);
-  }
+function parseIntOrKeep(value, existingValue) {
+  return value.trim() === '' ? existingValue : parseInt(value, 10);
+}
 
- function saveEdits() {
+function saveEdits() {
   const data = currentData;
-  data.title = document.getElementById('editTitle').value;
-  data.description = document.getElementById('editDescription').value;
-  data.grade = document.getElementById('editGrade').value;
-  data.cost = parseIntOrBlank(document.getElementById('editCost').value);
-  data.estimatedTime = parseIntOrBlank(document.getElementById('editEstimatedTime').value);
-  data.totalQuestions = parseIntOrBlank(document.getElementById('editTotalQuestions').value);
+  data.title = document.getElementById('editTitle').value.trim();
+  data.description = document.getElementById('editDescription').value.trim();
+data.grade = parseIntOrKeep(document.getElementById('editGrade').value, data.grade);
+data.cost = parseIntOrKeep(document.getElementById('editCost').value, data.cost);
+  data.estimatedTime = parseIntOrKeep(document.getElementById('editEstimatedTime').value, data.estimatedTime);
+  data.totalQuestions = parseIntOrKeep(document.getElementById('editTotalQuestions').value, data.totalQuestions);
 
   const questionDivs = document.getElementById('editQuestions').children;
-  data.questions = [];
+  const originalQuestions = currentData.questions || [];
 
-  for (let div of questionDivs) {
-    const inputs = div.querySelectorAll('input');
-    const questionText = inputs[0].value.trim();
-    const question = {
-      question: questionText,
-      options: []
-    };
+  const updatedQuestions = [];
 
-    // Determine if it's a non_question
-    const isNonQuestion = questionText.toLowerCase().startsWith('note:') || questionText.toLowerCase().includes('instruction');
+  for (let i = 0; i < questionDivs.length; i++) {
+    const div = questionDivs[i];
+    const questionInputs = div.querySelectorAll('input');
+    const textareas = div.querySelectorAll('textarea');
 
-    if (isNonQuestion) {
-      question.non_question = true;
-      question.answer = '';
-      question.options = [];
-    } else {
-      // Collect options
-      for (let i = 1; i < inputs.length - 1; i++) {
-        question.options.push(inputs[i].value.trim());
-      }
+    const original = originalQuestions[i] || {};
+    const questionText = questionInputs[0].value.trim(); // question
+    const imageText = questionInputs[1].value.trim();     // image
 
-      let ans = inputs[inputs.length - 1].value.trim();
-      if (ans === '') {
-        question.answer = '';
-      } else if (!isNaN(ans)) {
-        question.answer = parseInt(ans);
-      } else {
-        question.answer = ans;
-      }
+    const isNonQuestion = questionText.toLowerCase().startsWith('note:') ||
+                          questionText.toLowerCase().includes('instruction');
+
+    // Start from original and selectively overwrite
+    const updated = { ...original };
+    updated.question = questionText;
+    updated.image = imageText;
+
+if (isNonQuestion || original.non_question) {
+  updated.non_question = true;
+  updated.options = [];
+  updated.answer = '';
+} else {
+  // Only overwrite if it was previously false or undefined
+  if ('non_question' in updated) delete updated.non_question;
+
+  updated.options = [];
+  for (let j = 2; j < questionInputs.length - 1; j++) {
+    const opt = questionInputs[j].value.trim();
+    if (opt !== '') updated.options.push(opt);
+  }
+
+  const ans = questionInputs[questionInputs.length - 1].value.trim();
+  if (ans === '') {
+    updated.answer = '';
+  } else if (!isNaN(ans)) {
+    updated.answer = parseInt(ans, 10);
+  } else {
+    updated.answer = ans;
+  }
+}
+
+    if (textareas.length > 0) {
+      updated.explanation = textareas[0].value.trim();
     }
 
-    // data.questions.push(question);
-    const explanationInput = div.querySelector('textarea');
-if (explanationInput) {
-  question.explanation = explanationInput.value.trim();
-}
-
-
-const imageInput = div.querySelector('input[placeholder="Image URL or description"]');
-if (imageInput) {
-  question.image = imageInput.value.trim();
-}
-data.questions.push(question);
+    updatedQuestions.push(updated);
   }
+
+  data.questions = updatedQuestions;
 
   updateAll();
 }
