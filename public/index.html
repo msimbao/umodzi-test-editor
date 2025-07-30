@@ -138,7 +138,7 @@
     <input type="text" id="editDescription" placeholder="Description">
     
     <label for="editGrade">Grade</label>
-    <input type="number" id="editGrade" placeholder="Grade">
+    <input type="string" id="editGrade" placeholder="Grade">
     
     <label for="editCost">Cost</label>
     <input type="number" id="editCost" placeholder="Cost">
@@ -409,7 +409,7 @@ function saveEdits() {
   const data = currentData;
   data.title = document.getElementById('editTitle').value.trim();
   data.description = document.getElementById('editDescription').value.trim();
-data.grade = parseIntOrKeep(document.getElementById('editGrade').value, data.grade);
+data.grade = document.getElementById('editGrade').value.trim();
 data.cost = parseIntOrKeep(document.getElementById('editCost').value, data.cost);
   data.estimatedTime = parseIntOrKeep(document.getElementById('editEstimatedTime').value, data.estimatedTime);
   data.totalQuestions = parseIntOrKeep(document.getElementById('editTotalQuestions').value, data.totalQuestions);
