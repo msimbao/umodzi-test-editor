@@ -217,7 +217,7 @@
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `${currentData.id || 'quiz'}.json`;
+    a.download = `${currentData.title.replace(/ /g,"_")}-${currentData.id}-${currentData.subject}-${currentData.totalQuestions}-${currentData.estimatedTime}-${currentData.difficulty}-${currentData.cost}.json`;
     a.click();
     URL.revokeObjectURL(url);
   }
