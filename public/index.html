@@ -93,6 +93,29 @@
       display: block;
       margin-top: 8px;
     }
+    .saveButton{
+      position:absolute;
+      width: 30%;
+      right:50px;
+      /* height:20px; */
+    }
+    .folderItems{
+      padding:10px;
+      border:2px solid white;
+    }
+    #imageInput {
+  padding: 20px;
+  border: 2px dashed #ccc;
+  background: #fafafa;
+  cursor: pointer;
+}
+#imageInput:hover {
+  border-color: #007bff;
+}
+.imageText{
+  color:red;
+}
+
   </style>
 </head>
 <body>
@@ -102,13 +125,17 @@
   <div class="tabs">
     <div class="tab active" data-tab="input">LOAD TEST</div>
     <div class="tab" data-tab="copy">DOWNLOAD</div>
+    <div class="tab" data-tab="browse">BROWSE</div>
+    <div class="tab" data-tab="uploadImage">UPLOAD IMAGE</div>
+
   </div>
   <div id="input" class="tab-content active">
     <textarea id="jsonInput" placeholder="Paste your TEST here"></textarea>
+       <button onclick="loadJSON()">READ TEST</button>
+
     <br>
     <input type="file" id="fileInput" accept=".json">
     <br>
-    <button onclick="loadJSON()">UPLOAD TEST</button>
   </div>
   <div id="copy" class="tab-content">
     <textarea id="jsonOutput" readonly></textarea>
@@ -116,6 +143,83 @@
     <button onclick="copyJSON()">COPY</button>
     <button onclick="downloadJSON()">DOWNLOAD</button>
   </div>
+<div id="browse" class="tab-content">
+
+  
+  <label for="gradeSelect">Grade:</label>
+  <select id="gradeSelect">
+    <option value="">-- Select Grade --</option>
+    <option value="grade5-7">Grade 5-7</option>
+    <option value="grade8-9">Grade 8-9</option>
+    <option value="grade10-12">Grade 10-12</option>
+  </select>
+
+  <label for="subjectSelect">Subject:</label>
+  <select id="subjectSelect">
+    <option value="">-- Select Subject --</option>
+    <option value="English">English</option>
+    <option value="Mathematics">Mathematics</option>
+    <option value="Science">Science</option>
+        <option value="Chemistry">Chemistry</option>
+            <option value="Physics">Physics</option>
+    <option value="Biology">Biology</option>
+    <option value="Civics">Civics</option>
+    <option value="Social_Studies">Social Studies</option>
+    <option value="Accounting">Accounting</option>
+        <option value="French">French</option>
+                <option value="History">History</option>
+
+<br>
+<!-- <label for="fileSearchInput"><strong>Search Files:</strong></label>
+<input type="text" id="fileSearchInput" placeholder="Type to filter files..." oninput="filterSupabaseFileList()" style="width: 100%; margin-bottom: 10px;"> -->
+
+
+    <!-- Add more as needed -->
+  </select>
+
+  <br><br>
+  <button onclick="listSupabaseFiles()">Refresh Files</button>
+  <div id="supabaseFiles"></div>
+</div>
+<div id="uploadImage" class="tab-content">
+  <label for="gradeSelectImg"><strong>Grade:</strong></label>
+  <select id="gradeSelectImg">
+    <option value="">-- Select Grade --</option>
+    <option value="grade5-7">Grade 5-7</option>
+    <option value="grade8-9">Grade 8-9</option>
+    <option value="grade10-12">Grade 10-12</option>
+  </select>
+
+  <label for="subjectSelectImg"><strong>Subject:</strong></label>
+  <select id="subjectSelectImg">
+    <option value="">-- Select Subject --</option>
+    <option value="English">English</option>
+    <option value="Mathematics">Mathematics</option>
+    <option value="Science">Science</option>
+        <option value="Chemistry">Chemistry</option>
+            <option value="Physics">Physics</option>
+    <option value="Biology">Biology</option>
+    <option value="Civics">Civics</option>
+    <option value="Social_Studies">Social Studies</option>
+    <option value="Accounting">Accounting</option>
+        <option value="French">French</option>
+                <option value="History">History</option>
+  </select>
+
+  <br><br>
+  <label for="imageInput"><strong>Select Image (drag & drop or click):</strong></label>
+  <input type="file" id="imageInput" accept="image/*" style="width: 100%; margin-bottom: 10px;" />
+
+  <div id="imagePreview" style="margin-top: 10px;"></div>
+
+  <button onclick="uploadImageToSupabase()">UPLOAD IMAGE</button>
+
+  <div id="uploadedImageURL" style="margin-top: 10px;"></div>
+</div>
+
+
+</div>
+
 </div>
 
 <!-- Right Panel -->
@@ -123,6 +227,8 @@
   <div class="tabs">
     <div class="tab active" data-tab="preview">PREVIEW</div>
     <div class="tab" data-tab="edit">EDIT TEST</div>
+    <div class="tab" data-tab="upload">UPLOAD TEST</div>
+    
   </div>
   <div id="preview" class="tab-content active">
 <button onclick="printPreview()">Print as PDF</button>
@@ -133,7 +239,7 @@
     <div id="questions"></div>
   </div>
   <div id="edit" class="tab-content">
-    <button onclick="saveEdits()">Save</button>
+    <button class="saveButton" onclick="saveEdits()">Save</button>
     <br><br>
     <label for="editTitle">Title</label>
     <input type="text" id="editTitle" placeholder="Title">
@@ -155,6 +261,21 @@
 
     <div id="editQuestions"></div>
   </div>
+
+  <div id="upload" class="tab-content">
+  <h3>Before Uploading, Please Make Sure:</h3>
+  <ol>
+    <li>The <strong>ID</strong>, <strong>title</strong>, and <strong>description</strong> do not have any dashes (-).</li>
+    <li>The <strong>grade</strong> is correct, <strong>subject</strong> is correctly written, and <strong>difficulty</strong> is "easy", "medium", or "hard".</li>
+    <li><strong>Cost</strong> is set to 0 (if free) or more than 0 (if premium).</li>
+    <li><strong>Images</strong> are properly set if needed.</li>
+    <li><strong>Explanations</strong> and <strong>answers</strong> are concise and equations are short.</li>
+    <li><strong>Answers</strong> are correct. For MCQs, indexing starts from <code>0 → 3</code>, so option A → 0, option B → 1, etc</li>
+    <li>You have pressed SAVE to save any edits you made in the edit tab and are happy with the test 😊</li>
+  </ol>
+  <button onclick="confirmUpload()">UPLOAD TEST</button>
+</div>
+
 </div>
 
 
@@ -254,6 +375,31 @@ function updatePreview() {
     p.innerHTML = renderMath(q.question || '');
     div.appendChild(p);
 
+
+          if (q.image) {
+  const imgContainer = document.createElement('div');
+  imgContainer.style.marginTop = '0.5rem';
+
+  // Simple check: if it looks like a URL or image filename, try to show image
+  const isImage = /\.(jpg|jpeg|png|gif|svg|webp)$/i.test(q.image) || q.image.startsWith('https');
+
+  if (isImage) {
+    const img = document.createElement('img');
+    img.src = q.image;
+    img.alt = 'Question image';
+    img.style.maxWidth = '100%';
+    img.style.marginTop = '0.25rem';
+    imgContainer.appendChild(img);
+  } else {
+    const text = document.createElement('p');
+    text.className = "imageText"
+    text.innerHTML = '<strong>Image:</strong> ' + q.image;
+    imgContainer.appendChild(text);
+  }
+
+  div.appendChild(imgContainer);
+}
+
     if (q.non_question) {
       container.appendChild(div);
       return;
@@ -265,28 +411,7 @@ function updatePreview() {
       const ul = document.createElement('ul');
       ul.className = 'options';
 
-      if (q.image) {
-  const imgContainer = document.createElement('div');
-  imgContainer.style.marginTop = '0.5rem';
 
-  // Simple check: if it looks like a URL or image filename, try to show image
-  const isImage = /\.(jpg|jpeg|png|gif|svg|webp)$/i.test(q.image) || q.image.startsWith('http');
-
-  if (isImage) {
-    const img = document.createElement('img');
-    img.src = q.image;
-    img.alt = 'Question image';
-    img.style.maxWidth = '100%';
-    img.style.marginTop = '0.25rem';
-    imgContainer.appendChild(img);
-  } else {
-    const text = document.createElement('p');
-    text.innerHTML = '<strong>Image:</strong> ' + q.image;
-    imgContainer.appendChild(text);
-  }
-
-  div.appendChild(imgContainer);
-}
 
       q.options.forEach((opt, i) => {
         const li = document.createElement('li');
@@ -411,9 +536,11 @@ function parseIntOrKeep(value, existingValue) {
 }
 
 function saveEdits() {
+        alert('Test Saved!');
+
   const data = currentData;
-  data.title = document.getElementById('editTitle').value.trim();
-  data.description = document.getElementById('editDescription').value.trim();
+  data.title = document.getElementById('editTitle').value.trim().replace("-"," ");
+  data.description = document.getElementById('editDescription').value.trim().replace("-","");
 data.grade = document.getElementById('editGrade').value.trim();
 data.cost = parseIntOrKeep(document.getElementById('editCost').value, data.cost);
   data.estimatedTime = parseIntOrKeep(document.getElementById('editEstimatedTime').value, data.estimatedTime);
@@ -489,6 +616,195 @@ if (isNonQuestion || original.non_question) {
   }
 </script>
 
+<script type="module">
+  import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
+
+  const supabaseUrl = 'https://tlqvryhcjgzbcmimdycx.supabase.co';
+  const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRscXZyeWhjamd6YmNtaW1keWN4Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc1Mzg5MDMwMywiZXhwIjoyMDY5NDY2MzAzfQ.BCJK-LRgo-X_S4IxlLyZON7rMnYVVl3h34BGWISUVY0'; // ← Replace this with your actual anon/public key
+  const supabase = createClient(supabaseUrl, supabaseKey);
+
+  window.confirmUpload = async function () {
+    saveEdits()
+    if (!confirm("Are you sure you want to upload and have double-checked everything? Have you pressed save in edits if you edited anything?")) return;
+
+    try {
+      const cleanedSubject = currentData.subject.replace(/ /g,"_")
+
+      const jsonStr = JSON.stringify(currentData, null, 2);
+      const fileName = `${currentData.title.replace(/ /g,"_")}-${currentData.id}-${cleanedSubject}-${currentData.totalQuestions}-${currentData.estimatedTime}-${currentData.difficulty}-${currentData.cost}.json`;
+      const path = `tests/grade${currentData.grade}/${cleanedSubject}/${fileName}`;
+
+      const { error } = await supabase.storage.from('umodoropapers').upload(path, new Blob([jsonStr], { type: 'application/json' }), {
+        upsert: true
+      });
+
+      if (error) {
+        alert("Upload failed: " + error.message);
+      } else {
+        alert("Upload successful!");
+      }
+    } catch (err) {
+      alert("Something went wrong: " + err.message);
+    }
+  };
+
+window.listSupabaseFiles = async function () {
+  const grade = document.getElementById('gradeSelect').value;
+  const subject = document.getElementById('subjectSelect').value;
+  const container = document.getElementById('supabaseFiles');
+
+  if (!grade || !subject) {
+    container.innerHTML = '<p>Please select both grade and subject.</p>';
+    return;
+  }
+
+  container.innerHTML = 'Loading...';
+
+  const path = `tests/${grade}/${subject}`;
+  const { data, error } = await supabase.storage.from('umodoropapers').list(path, { recursive: true });
+
+  if (error) {
+    container.innerHTML = 'Error loading files: ' + error.message;
+    return;
+  }
+
+  if (!data || data.length === 0) {
+    container.innerHTML = 'No files found in this folder.';
+    return;
+  }
+
+  const list = document.createElement('ul');
+  list.style.listStyle = 'none';
+  list.style.padding = '0';
+
+  for (const item of data) {
+    if (!item.name.endsWith('.json')) continue;
+
+    const fullPath = `${path}/${item.name}`;
+
+    const li = document.createElement('li');
+    li.style.marginBottom = '10px';
+    li.className = "folderItems"
+
+    const fileText = document.createElement('span');
+    fileText.textContent = item.name;
+
+    const brk = document.createElement('br');
+
+
+    const editBtn = document.createElement('button');
+    editBtn.textContent = 'Edit';
+    editBtn.style.marginLeft = '10px';
+    editBtn.onclick = async () => {
+            alert('Loading Test!');
+
+      const { data: fileData, error: downloadError } = await supabase.storage.from('umodoropapers').download(fullPath);
+      if (downloadError) return alert('Failed to download: ' + downloadError.message);
+      const text = await fileData.text();
+      document.getElementById('jsonInput').value = text;
+      loadJSON();
+      alert('File loaded into editor!');
+    };
+
+    const deleteBtn = document.createElement('button');
+    deleteBtn.textContent = 'Delete';
+    deleteBtn.style.marginLeft = '5px';
+    deleteBtn.onclick = async () => {
+      if (!confirm(`Delete ${item.name}?`)) return;
+      const { error: delError } = await supabase.storage.from('umodoropapers').remove([fullPath]);
+      if (delError) return alert('Failed to delete: ' + delError.message);
+      listSupabaseFiles();
+    };
+
+    const parts = item.name.split('-');
+    const details = document.createElement('span');
+    details.textContent = "Title: " + parts[0].split('_').join(' ') + "\n\n | id: " + parts[1] + "\n\n | # of Questions:" + parseInt(parts[3], 10) + "\n\n | Time: " + parseInt(parts[4], 10) +  " minutes " + " | Cost: " + parseInt(parts[6], 10) + "\n\n | Difficulty: " + parts[5]
+
+    li.appendChild(details);
+    li.appendChild(brk);
+    li.appendChild(editBtn);
+    li.appendChild(deleteBtn);
+    list.appendChild(li);
+  }
+
+  container.innerHTML = '';
+  container.appendChild(list);
+};
+
+//====================== UPLOAD IMAGE
+const imageInput = document.getElementById('imageInput');
+const previewContainer = document.getElementById('imagePreview');
+let selectedImageFile = null;
+
+// Drag & drop image preview
+imageInput.addEventListener('change', (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+
+  if (!file.type.startsWith('image/')) {
+    alert("Only image files are allowed.");
+    return;
+  }
+
+  selectedImageFile = file;
+
+  const reader = new FileReader();
+  reader.onload = (evt) => {
+    previewContainer.innerHTML = `<img src="${evt.target.result}" style="max-width: 100%; max-height: 200px;" />`;
+  };
+  reader.readAsDataURL(file);
+});
+
+window.uploadImageToSupabase = async function () {
+  const grade = document.getElementById('gradeSelectImg').value;
+  const subject = document.getElementById('subjectSelectImg').value;
+
+  if (!grade || !subject) {
+    alert("Please select both grade and subject.");
+    return;
+  }
+
+  if (!selectedImageFile) {
+    alert("No image selected.");
+    return;
+  }
+
+  const fileName = selectedImageFile.name;
+  const path = `tests/${grade}/${subject}/${fileName}`;
+
+  const { error } = await supabase.storage
+    .from('images')
+    .upload(path, selectedImageFile, { upsert: true });
+
+  if (error) {
+    alert("Upload failed: " + error.message);
+    return;
+  }
+
+  const { data: publicUrlData } = supabase.storage
+    .from('images')
+    .getPublicUrl(path);
+
+  const imageURL = publicUrlData.publicUrl;
+
+  const urlDiv = document.getElementById('uploadedImageURL');
+  urlDiv.innerHTML = `
+    <strong>Image URL:</strong><br>
+    <input type="text" value="${imageURL}" id="imageUrlInput" style="width: 100%;" readonly>
+    <button onclick="copyImageUrl()">COPY</button>
+  `;
+
+  alert("Upload successful!");
+};
+
+window.copyImageUrl = function () {
+  const urlInput = document.getElementById('imageUrlInput');
+  urlInput.select();
+  document.execCommand('copy');
+  alert("Image URL copied!");
+};
+
+</script>
 
 </body>
 </html>
