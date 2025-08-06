@@ -104,7 +104,7 @@
       border:2px solid white;
     }
     #imageInput {
-  padding: 20px;
+  padding: 2px;
   border: 2px dashed #ccc;
   background: #fafafa;
   cursor: pointer;
@@ -113,6 +113,9 @@
   border-color: #007bff;
 }
 .imageText{
+  color:red;
+}
+.inputImage{
   color:red;
 }
 
@@ -168,6 +171,8 @@
     <option value="Accounting">Accounting</option>
         <option value="French">French</option>
                 <option value="History">History</option>
+                                <option value="Computer_Studies">Computer_Studies</option>
+
 
 <br>
 <!-- <label for="fileSearchInput"><strong>Search Files:</strong></label>
@@ -204,6 +209,8 @@
     <option value="Accounting">Accounting</option>
         <option value="French">French</option>
                 <option value="History">History</option>
+                                <option value="Computer_Studies">Computer_Studies</option>
+
   </select>
 
   <br><br>
@@ -487,6 +494,7 @@ div.appendChild(labelImg);
 
 const inputImage = document.createElement('input');
 inputImage.type = 'text';
+inputImage.className = 'inputImage';
 inputImage.value = q.image || '';
 inputImage.placeholder = 'Image URL or description';
 div.appendChild(inputImage);
@@ -756,6 +764,7 @@ imageInput.addEventListener('change', (e) => {
 });
 
 window.uploadImageToSupabase = async function () {
+  alert("Uploading Image.....")
   const grade = document.getElementById('gradeSelectImg').value;
   const subject = document.getElementById('subjectSelectImg').value;
 
