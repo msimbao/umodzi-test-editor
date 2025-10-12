@@ -651,7 +651,7 @@ if (isNonQuestion || original.non_question) {
 
       const jsonStr = JSON.stringify(currentData, null, 2);
       const fileName = `${currentData.title.replace(/ /g,"_")}-${currentData.id}-${cleanedSubject}-${currentData.totalQuestions}-${currentData.estimatedTime}-${currentData.difficulty}-${currentData.cost}.json`;
-      const path = `tests/grade${currentData.grade}/${cleanedSubject}/${fileName}`;
+      const path = `pastpapers/grade${currentData.grade}/${cleanedSubject}/${fileName}`;
 
       const { error } = await supabase.storage.from('umodoropapers').upload(path, new Blob([jsonStr], { type: 'application/json' }), {
         upsert: true
@@ -679,7 +679,7 @@ window.listSupabaseFiles = async function () {
 
   container.innerHTML = 'Loading...';
 
-  const path = `tests/${grade}/${subject}`;
+  const path = `pastpapers/${grade}/${subject}`;
   const { data, error } = await supabase.storage.from('umodoropapers').list(path, { recursive: true });
 
   if (error) {
